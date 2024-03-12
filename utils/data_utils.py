@@ -13,23 +13,33 @@ def process_common_voice_tsv(filename: str):
         # "label": "menk"
     #  }
     
+    # try using filelist_to_manifest
+    # input:
+    
+    
+    # filelist - 
+    # !python {NEMO_ROOT}/scripts/speaker_tasks/filelist_to_manifest.py
+    # --filelist {data_dir}/an4/wav/an4_clstk/train_all.txt
+    # --id -2
+    # --out {data_dir}/an4/wav/an4_clstk/all_manifest.json 
+    # --split
+    
+    
     file_path  = os.path.dirname(filename)
     # read the file into a dataframe
-    df = convert_to_df(filename)
+    df = preprocess_df(filename)
     # client_id, speaker_id, path
     
-    test_filename = '32000.mp3'
+    # go over the row in the df, and for each row:
+    # 1. convert the mp3/wav audio file to nemo format (mono, 16000, agc)
+    # 2. create a nemo record
     
-    
-    
-    test = (get_wav_duration(os.path.join(file_path, 'clips', test_filename)))
-    print(test)
-    
+    df.apply(concert)
     
     
     print(len(df))
 
-def convert_to_df(filename):
+def preprocess_df(filename):
     df = pd.read_csv(filename, sep='\t')
     df = df[['client_id', 'path']]
     client_id_mappings = {}

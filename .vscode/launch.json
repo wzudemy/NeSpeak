@@ -3,9 +3,10 @@
     "configurations": [
         {
             "name": "Python: Current File",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
-            "program": "${file}",
+            // "program": "${file}",
+            "program": "unit_tests/unit_test_utils.py",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}"
         }
