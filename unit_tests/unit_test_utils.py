@@ -3,7 +3,7 @@ from utils.audio_utils import convert_to_nemo_format, convert_to_nemo_format_usi
 import librosa
 from pydub import AudioSegment
 
-from utils.common_voice_utils import copy_files_to_folder_according_to_speaker, prepare_common_voice_to_name
+from utils.common_voice_utils import copy_files_to_folder_according_to_speaker, prepare_common_voice_to_nemo
 
 
 
@@ -75,12 +75,12 @@ class audio_utils_tests(unittest.TestCase):
         self.assertEqual(23, 23)
         
         
-    def test_prepare_common_voice_to_name_ar(self):
-        res = prepare_common_voice_to_name('data/common_voice/raw/ar/train.tsv')
-        self.assertEqual((407, 407),  res)
+    def test_prepare_common_voice_to_nemo_ar(self):
+        res = prepare_common_voice_to_nemo('data/common_voice/raw/ar/train.tsv')
+        self.assertEqual((407, 407), res)
         
-    def test_prepare_common_voice_to_name_tr(self):
-        res = prepare_common_voice_to_name('data/common_voice/raw/tr/train.tsv')
+    def test_prepare_common_voice_to_nemo_tr(self):
+        res = prepare_common_voice_to_nemo('data/common_voice/raw/tr/train.tsv')
         self.assertEqual((407, 407),  res)
         
 

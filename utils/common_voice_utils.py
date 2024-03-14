@@ -18,24 +18,29 @@ tqdm.pandas()
 
 def copy_file_to_its_client_folder(row):
     path = row['path']
+    lang = row['lang']
     src_path = os.path.join(row['clips_path'], path)
     if os.path.exists(src_path):
         
-        # convert to nemo
-        # src_path = convert_to_nemo_format_using_pydub(src_path)
-        # dst_filename = change_extension(path, '.wav')
+        # convert to nemo (done afterwards)
+        # nemo_src_path = convert_to_nemo_format_using_pydub(src_path)
+        # nemo_src_filename = os.path.basename(nemo_src_path)
         
         # without converstion
-        dst_filename = path
+        # dst_filename = path
+        nemo_src_path = src_path
+        nemo_src_filename = path
         
         speaker_id = row['speaker_id']
-        dst_path = f'data/common_voice/nemo/{speaker_id}/{dst_filename}'
-        copy_file_with_path(src_path, dst_path)
+        speaker_id = f'{lang}_{speaker_id}'
+        
+        nemo_dst_path = os.path.join('data', 'common_voice', 'nemo', speaker_id, nemo_src_filename)
+        copy_file_with_path(nemo_src_path, nemo_dst_path)
     else:
         print(f"copy_file_to_its_client_folder: {src_path} does not exists")
     
 
-def copy_files_to_folder_according_to_speaker(tsv_file, out_dir=None, chunk_size=100):
+def copy_files_to_folder_according_to_speaker(tsv_file, lang, out_dir=None, chunk_size=1000):
     df = preprocess_df(tsv_file)
     # df = df.head(1000)
     df_spk =f'{tsv_file}_spk.tsv'
@@ -46,6 +51,7 @@ def copy_files_to_folder_according_to_speaker(tsv_file, out_dir=None, chunk_size
     for chunk in tqdm(df_chunked):
         # Process the chunk
         chunk['clips_path'] = os.path.join(os.path.dirname(tsv_file), 'clips')
+        chunk['lang'] = lang
         
         # for each row, copy the filename to a folder with the client id name
         chunk.progress_apply(copy_file_to_its_client_folder, axis=1)
@@ -53,7 +59,7 @@ def copy_files_to_folder_according_to_speaker(tsv_file, out_dir=None, chunk_size
         
     return df['speaker_id'].nunique()
 
-def prepare_common_voice_to_name(common_voice_file_list: str):
+def copy_files_to_folder_according_to_speaker(common_voice_file_list: str, chunk_size=100):
     
     # convert from common voice format to a Nemo manifest format
     
@@ -76,18 +82,31 @@ def prepare_common_voice_to_name(common_voice_file_list: str):
     
     lang = get_immediate_parent(common_voice_file_list)
     
-    copy_files_to_folder_according_to_speaker(common_voice_file_list)
+    df = preprocess_df(common_voice_file_list)
+    # df = df.head(1000)
+    df_spk =f'{common_voice_file_list}_spk.tsv'
+    df.to_csv(df_spk, sep='\t')
+    df_chunked = pd.read_csv(df_spk, sep='\t', chunksize=chunk_size)
     
-    data_dir = "/home/eyal/github/wzudemy/NeSpeak/data/common_voice/nemo"
-    
-    os.path.join(data_dir, lang)
+    # Read the CSV file in chunks
+    for chunk in tqdm(df_chunked):
+        # Process the chunk
+        chunk['clips_path'] = os.path.join(os.path.dirname(common_voice_file_list), 'clips')
+        chunk['lang'] = lang
         
-    mp3_files_list = glob(os.path.join(data_dir, "**", "*.mp3"), recursive=True)
+        # for each row, copy the filename to a folder with the client id name
+        chunk.progress_apply(copy_file_to_its_client_folder, axis=1)
+        
+        
+    return df['speaker_id'].nunique()
+
+def prepare_common_voice_to_nemo(out_dir, common_voice_file_list):
+    mp3_files_list = glob(os.path.join(out_dir, "**", "*.mp3"), recursive=True)
     
     with ProcessPoolExecutor() as pool:
         wav_files = pool.map(convert_to_nemo_format_using_pydub, mp3_files_list)
         
-    wav_files_list = glob(os.path.join(data_dir, "**", "*.wav"), recursive=True)
+    wav_files_list = glob(os.path.join(out_dir, "**", "*.wav"), recursive=True)
     
     filelist_txt_file = change_extension(common_voice_file_list, ".txt")
     
@@ -98,4 +117,7 @@ def prepare_common_voice_to_name(common_voice_file_list: str):
     filelist_to_manifest(filelist_txt_file, None, -2, manifest_file, False, False, min_count=0)
     
     return len(mp3_files_list), len(list(wav_files))
+
+
+def 
  

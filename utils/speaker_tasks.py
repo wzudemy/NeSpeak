@@ -33,6 +33,7 @@ Args:
 """
 
 import argparse
+import glob
 import json
 import os
 import random
@@ -44,6 +45,8 @@ import sox
 from sklearn.model_selection import StratifiedShuffleSplit
 from tqdm.contrib.concurrent import process_map
 from nemo.collections.asr.parts.utils.manifest_utils import read_manifest
+
+from utils.file_utils import write_list_to_file
 
 random.seed(42)
 
@@ -164,9 +167,14 @@ def get_labels(lines):
     return labels
 
 
-def filelist_to_manifest(filelist, manifest, id, out, split=False, create_segments=False, min_count=10):
+def filelist_to_manifest(wav_dir, manifest, id, out, split=False, create_segments=False, min_count=10):
     if os.path.exists(out):
         os.remove(out)
+        
+    filelist_abspath_list = glob.glob(os.path.join(wav_dir, "**", "*.wav"), recursive=True)
+    filelist= os.path.join(wav_dir, 'filelist.txt')
+    write_list_to_file(filelist_abspath_list, filelist)
+    
     if filelist:
         lines = read_file(filelist=filelist, id=id)
         lines = process_map(get_duration, lines, chunksize=100)

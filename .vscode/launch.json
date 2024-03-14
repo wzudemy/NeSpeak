@@ -6,7 +6,8 @@
             "type": "debugpy",
             "request": "launch",
             // "program": "${file}",
-            "program": "unit_tests/unit_test_utils.py",
+            // "program": "unit_tests/unit_test_utils.py",
+            "program": "main.py",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}"
         }
