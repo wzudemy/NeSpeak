@@ -1,6 +1,0 @@
-# exteranl setups
-# sodu apt-get install sox libsndfile1 ffmpeg
-
-# py3.10
-Cython
-nemo_toolkit[all] # or nemo_toolkit[all]
